@@ -5,9 +5,9 @@ MCP (Model Context Protocol) server for accessing Fresha Data Connector via Snow
 ## Installation
 
 ```bash
-npm install -g @fresha/mcp-server
+npm install -g fresha-mcp-server
 # or run directly with npx
-npx @fresha/mcp-server
+npx fresha-mcp-server
 ```
 
 ## Configuration
@@ -35,7 +35,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
   "mcpServers": {
     "fresha": {
       "command": "npx",
-      "args": ["@fresha/mcp-server"],
+      "args": ["fresha-mcp-server"],
       "env": {
         "SNOWFLAKE_ACCOUNT": "your-account.snowflakecomputing.com",
         "SNOWFLAKE_USER": "your-username",

@@ -5,7 +5,7 @@ import { logger } from './utils/logger.js';
 import { tools, handleToolCall } from './tools/index.js';
 export function createServer() {
     const server = new Server({
-        name: '@fresha/mcp-server',
+        name: 'fresha-mcp-server',
         version: '0.1.0',
     }, {
         capabilities: {

@@ -1,23 +1,27 @@
-// Redirect Snowflake SDK logs to stderr
-const originalStdoutWrite = process.stdout.write;
-const snowflakeLogPattern = /^\{"level":|^\[[\d:]+\s+[AP]M\]:/;
+// Silence all Snowflake SDK logging
+process.env.SF_LOG_LEVEL = 'OFF';
+process.env.SNOWFLAKE_LOG_LEVEL = 'OFF';
+process.env.SNOWFLAKE_DISABLE_CONSOLE_LOGGING = 'true';
 
-// Override stdout.write to redirect Snowflake logs to stderr
-process.stdout.write = function(chunk: string | Uint8Array, ...args: any[]): boolean {
+// Redirect Snowflake SDK logs away from stdout
+const originalStdoutWrite = process.stdout.write.bind(process.stdout);
+const snowflakeLogPattern = /^\{"level":|^\[[\d:]+\s+[AP]M\]:|snowflake-sdk|Creating Connection|authentication successful/i;
+
+// Override stdout.write to filter out Snowflake logs
+(process.stdout as any).write = function(chunk: string | Uint8Array, ...args: any[]): boolean {
   const str = chunk.toString();
   
-  // If it looks like a Snowflake log, redirect to stderr
+  // Block all Snowflake SDK logs from stdout
   if (snowflakeLogPattern.test(str)) {
-    return process.stderr.write.apply(process.stderr, [chunk, ...args] as any);
+    // Silently discard or optionally redirect to stderr
+    // return process.stderr.write.apply(process.stderr, [chunk, ...args] as any);
+    return true; // Pretend write succeeded but don't actually write
   }
   
-  // Otherwise, use original stdout
-  return originalStdoutWrite.apply(process.stdout, [chunk, ...args] as any);
+  // Allow JSON-RPC messages and other output
+  return originalStdoutWrite(chunk, ...args);
 };
 
 export function silenceSnowflakeLogs() {
-  // Set environment variable
-  process.env.SF_LOG_LEVEL = 'OFF';
-  
-  // The override is already in place
+  // Already configured above
 }

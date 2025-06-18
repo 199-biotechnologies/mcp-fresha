@@ -34,8 +34,8 @@ function getTablesController(): TablesController {
 // Tool definitions
 export const tools: Tool[] = [
   {
-    name: 'list_tables',
-    description: 'List all tables and views in the Fresha database',
+    name: 'list_fresha_reports',
+    description: 'List all available Fresha reports, tables and views in the database',
     inputSchema: {
       type: 'object',
       properties: {
@@ -47,8 +47,8 @@ export const tools: Tool[] = [
     },
   },
   {
-    name: 'get_cash_flow_statement',
-    description: 'Get cash flow statement for a date range with transaction breakdown',
+    name: 'get_fresha_cash_flow',
+    description: 'Get Fresha cash flow statement for a date range with detailed transaction breakdown',
     inputSchema: {
       type: 'object',
       properties: {
@@ -69,7 +69,7 @@ export const tools: Tool[] = [
 // Tool handlers
 export async function handleToolCall(name: string, args: any) {
   switch (name) {
-    case 'list_tables': {
+    case 'list_fresha_reports': {
       const input = ListTablesSchema.parse(args);
       const result = await getTablesController().listTables(input.pattern);
       return {
@@ -82,7 +82,7 @@ export async function handleToolCall(name: string, args: any) {
       };
     }
     
-    case 'get_cash_flow_statement': {
+    case 'get_fresha_cash_flow': {
       const input = GetCashFlowSchema.parse(args);
       const result = await getCashFlowController().getCashFlowStatement(input.start_date, input.end_date);
       return {

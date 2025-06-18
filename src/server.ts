@@ -8,7 +8,7 @@ export function createServer() {
   const server = new Server(
     {
       name: 'mcp-fresha',
-      version: '0.3.0',
+      version: '0.3.3',
     },
     {
       capabilities: {

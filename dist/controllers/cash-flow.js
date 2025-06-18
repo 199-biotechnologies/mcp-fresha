@@ -17,6 +17,15 @@ export class CashFlowController {
             // Format as markdown table
             let markdown = `# Cash Flow Statement\n\n`;
             markdown += `**Period:** ${startDate} to ${endDate}\n\n`;
+            // Check if we have data
+            if (summary.totalTransactions === 0) {
+                markdown += `*No transactions found for this period.*\n\n`;
+                markdown += `This could mean:\n`;
+                markdown += `- No activity occurred during this date range\n`;
+                markdown += `- The date range is outside your available data\n`;
+                markdown += `- Data sync may be pending in Fresha Data Connector\n`;
+                return markdown;
+            }
             markdown += `## Summary\n\n`;
             markdown += `| Metric | Amount (${summary.rawData[0]?.CURRENCY || 'GBP'}) |\n`;
             markdown += `|--------|--------|\n`;

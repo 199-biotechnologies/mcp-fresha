@@ -1,3 +1,3 @@
 #!/usr/bin/env node
-export {};
+import './utils/silence-snowflake.js';
 //# sourceMappingURL=index.d.ts.map

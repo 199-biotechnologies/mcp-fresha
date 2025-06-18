@@ -6,7 +6,7 @@ MCP (Model Context Protocol) server for accessing Fresha Data Connector via Snow
 
 ```bash
 # Run directly with npx (recommended)
-npx fresha-mcp-server
+npx mcp-fresha
 ```
 
 ## Configuration
@@ -34,7 +34,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
   "mcpServers": {
     "fresha": {
       "command": "npx",
-      "args": ["fresha-mcp-server"],
+      "args": ["mcp-fresha"],
       "env": {
         "SNOWFLAKE_ACCOUNT": "your-account.snowflakecomputing.com",
         "SNOWFLAKE_USER": "your-username",
@@ -100,9 +100,6 @@ npm run lint
 - Snowflake credentials are validated on startup
 
 ## Troubleshooting
-
-### Mock Mode
-If Snowflake credentials are not configured, the server runs in mock mode with sample data. You'll see a warning in the logs: "Using mock service - Snowflake credentials not configured"
 
 ### Connection Issues
 - Verify your Snowflake account URL format (remove https:// prefix)

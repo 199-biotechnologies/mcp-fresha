@@ -1,17 +1,16 @@
 import { QueryService } from '../services/queries.js';
-import { MockQueryService } from '../services/mock-queries.js';
 import { logger } from '../utils/logger.js';
+import { createQueryService } from '../utils/snowflake-helpers.js';
 
 export class TablesController {
-  private queryService: QueryService | MockQueryService;
+  private queryService: QueryService;
 
   constructor() {
-    // Use mock service if credentials are not properly configured
-    const hasCredentials = process.env.SNOWFLAKE_ACCOUNT && process.env.SNOWFLAKE_USER && process.env.SNOWFLAKE_PASSWORD;
-    this.queryService = hasCredentials ? new QueryService() : new MockQueryService();
-    
-    if (!hasCredentials) {
-      logger.warn('Using mock service - Snowflake credentials not configured');
+    try {
+      this.queryService = createQueryService();
+    } catch (error) {
+      logger.error({ error }, 'Failed to initialize TablesController');
+      throw error;
     }
   }
 

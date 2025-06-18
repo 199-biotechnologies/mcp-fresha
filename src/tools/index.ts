@@ -13,9 +13,23 @@ export const GetCashFlowSchema = z.object({
   end_date: z.string().describe('End date in ISO format (YYYY-MM-DD)'),
 });
 
-// Controllers
-const cashFlowController = new CashFlowController();
-const tablesController = new TablesController();
+// Controllers - initialized lazily to allow server to start even without credentials
+let cashFlowController: CashFlowController | null = null;
+let tablesController: TablesController | null = null;
+
+function getCashFlowController(): CashFlowController {
+  if (!cashFlowController) {
+    cashFlowController = new CashFlowController();
+  }
+  return cashFlowController;
+}
+
+function getTablesController(): TablesController {
+  if (!tablesController) {
+    tablesController = new TablesController();
+  }
+  return tablesController;
+}
 
 // Tool definitions
 export const tools: Tool[] = [
@@ -57,7 +71,7 @@ export async function handleToolCall(name: string, args: any) {
   switch (name) {
     case 'list_tables': {
       const input = ListTablesSchema.parse(args);
-      const result = await tablesController.listTables(input.pattern);
+      const result = await getTablesController().listTables(input.pattern);
       return {
         content: [
           {
@@ -70,7 +84,7 @@ export async function handleToolCall(name: string, args: any) {
     
     case 'get_cash_flow_statement': {
       const input = GetCashFlowSchema.parse(args);
-      const result = await cashFlowController.getCashFlowStatement(input.start_date, input.end_date);
+      const result = await getCashFlowController().getCashFlowStatement(input.start_date, input.end_date);
       return {
         content: [
           {

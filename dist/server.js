@@ -5,11 +5,11 @@ import { logger } from './utils/logger.js';
 import { tools, handleToolCall } from './tools/index.js';
 export function createServer() {
     const server = new Server({
-        name: 'fresha-mcp-server',
-        version: '0.1.0',
+        name: 'mcp-fresha',
+        version: '0.3.0',
     }, {
         capabilities: {
-            tools: {},
+            tools: { list: true, call: true },
         },
     });
     // Register tool handlers

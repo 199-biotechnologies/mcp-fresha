@@ -1,15 +1,6 @@
 import { pino } from 'pino';
 import { config } from 'dotenv';
-config();
-export const logger = pino({
-    level: process.env.LOG_LEVEL || 'info',
-    transport: {
-        target: 'pino-pretty',
-        options: {
-            colorize: true,
-            translateTime: 'SYS:standard',
-            ignore: 'pid,hostname',
-        },
-    },
-});
+config(); // loads .env when present
+export const logger = pino({ level: process.env.LOG_LEVEL || 'info', timestamp: pino.stdTimeFunctions.isoTime }, pino.destination(2) // 2 = stderr (stdout left 100% JSON-RPC)
+);
 //# sourceMappingURL=logger.js.map

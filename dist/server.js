@@ -6,7 +6,7 @@ import { tools, handleToolCall } from './tools/index.js';
 export function createServer() {
     const server = new Server({
         name: 'mcp-fresha',
-        version: '0.3.3',
+        version: '0.4.0',
     }, {
         capabilities: {
             tools: { list: true, call: true },

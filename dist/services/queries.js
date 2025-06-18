@@ -17,6 +17,47 @@ export class QueryService {
         const views = await this.snowflake.execute(query);
         return [...tables, ...views];
     }
+    async getReportData(params) {
+        const { tableName, startDate, endDate, dateColumn, limit = 1000, orderBy, filters = {} } = params;
+        logger.info({ tableName, startDate, endDate, limit }, 'Getting report data');
+        // Build query
+        let query = `SELECT * FROM ${tableName}`;
+        const conditions = [];
+        const binds = [];
+        // Add date filter if applicable
+        if ((startDate || endDate) && dateColumn) {
+            if (startDate && endDate) {
+                conditions.push(`${dateColumn} BETWEEN ? AND ?`);
+                binds.push(startDate, endDate);
+            }
+            else if (startDate) {
+                conditions.push(`${dateColumn} >= ?`);
+                binds.push(startDate);
+            }
+            else if (endDate) {
+                conditions.push(`${dateColumn} <= ?`);
+                binds.push(endDate);
+            }
+        }
+        // Add custom filters
+        for (const [key, value] of Object.entries(filters)) {
+            if (value !== undefined && value !== null) {
+                conditions.push(`${key} = ?`);
+                binds.push(value);
+            }
+        }
+        // Add WHERE clause if conditions exist
+        if (conditions.length > 0) {
+            query += ` WHERE ${conditions.join(' AND ')}`;
+        }
+        // Add ORDER BY
+        if (orderBy) {
+            query += ` ORDER BY ${orderBy}`;
+        }
+        // Add LIMIT
+        query += ` LIMIT ${limit}`;
+        return await this.snowflake.execute(query, binds);
+    }
     async getCashFlow(startDate, endDate) {
         logger.info({ startDate, endDate }, 'Getting cash flow data');
         const query = `

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { CashFlowController } from '../controllers/cash-flow.js';
+import { ReportController } from '../controllers/report.js';
 import { TablesController } from '../controllers/tables.js';
 
 // Tool input schemas
@@ -8,20 +8,24 @@ export const ListTablesSchema = z.object({
   pattern: z.string().optional().describe('Optional glob pattern to filter tables'),
 });
 
-export const GetCashFlowSchema = z.object({
-  start_date: z.string().describe('Start date in ISO format (YYYY-MM-DD)'),
-  end_date: z.string().describe('End date in ISO format (YYYY-MM-DD)'),
+export const GetReportSchema = z.object({
+  report_name: z.string().describe('Name of the Fresha report/table (e.g., CASH_FLOW, SALES, BOOKINGS)'),
+  start_date: z.string().optional().describe('Start date filter in ISO format (YYYY-MM-DD)'),
+  end_date: z.string().optional().describe('End date filter in ISO format (YYYY-MM-DD)'),
+  limit: z.number().optional().default(1000).describe('Maximum number of records to return'),
+  order_by: z.string().optional().describe('Column to sort by (e.g., "SALE_DATE DESC")'),
+  filters: z.record(z.any()).optional().describe('Additional filters as key-value pairs'),
 });
 
 // Controllers - initialized lazily to allow server to start even without credentials
-let cashFlowController: CashFlowController | null = null;
+let reportController: ReportController | null = null;
 let tablesController: TablesController | null = null;
 
-function getCashFlowController(): CashFlowController {
-  if (!cashFlowController) {
-    cashFlowController = new CashFlowController();
+function getReportController(): ReportController {
+  if (!reportController) {
+    reportController = new ReportController();
   }
-  return cashFlowController;
+  return reportController;
 }
 
 function getTablesController(): TablesController {
@@ -47,21 +51,38 @@ export const tools: Tool[] = [
     },
   },
   {
-    name: 'get_fresha_cash_flow',
-    description: 'Get Fresha cash flow statement for a date range with detailed transaction breakdown',
+    name: 'get_fresha_report',
+    description: 'Get data from any Fresha report/table with flexible filtering options',
     inputSchema: {
       type: 'object',
       properties: {
+        report_name: {
+          type: 'string',
+          description: 'Name of the Fresha report/table (e.g., CASH_FLOW, SALES, BOOKINGS)',
+        },
         start_date: {
           type: 'string',
-          description: 'Start date in ISO format (YYYY-MM-DD)',
+          description: 'Start date filter in ISO format (YYYY-MM-DD)',
         },
         end_date: {
           type: 'string',
-          description: 'End date in ISO format (YYYY-MM-DD)',
+          description: 'End date filter in ISO format (YYYY-MM-DD)',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of records to return (default: 1000)',
+        },
+        order_by: {
+          type: 'string',
+          description: 'Column to sort by (e.g., "SALE_DATE DESC")',
+        },
+        filters: {
+          type: 'object',
+          description: 'Additional filters as key-value pairs',
+          additionalProperties: true,
         },
       },
-      required: ['start_date', 'end_date'],
+      required: ['report_name'],
     },
   },
 ];
@@ -82,9 +103,9 @@ export async function handleToolCall(name: string, args: any) {
       };
     }
     
-    case 'get_fresha_cash_flow': {
-      const input = GetCashFlowSchema.parse(args);
-      const result = await getCashFlowController().getCashFlowStatement(input.start_date, input.end_date);
+    case 'get_fresha_report': {
+      const input = GetReportSchema.parse(args);
+      const result = await getReportController().getReport(input);
       return {
         content: [
           {

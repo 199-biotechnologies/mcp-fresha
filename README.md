@@ -38,19 +38,27 @@ Get these credentials from your Fresha Data Connector settings.
 
 ## Available Tools
 
-### `list_tables`
+### `list_fresha_reports`
 Lists all available tables and views in your Fresha database.
 
 **Example**: "Show me all tables"
 
-### `get_cash_flow_statement`
-Generates detailed cash flow statements with transaction breakdowns.
+### `get_fresha_report`
+Get data from any Fresha report/table with flexible filtering options.
 
 **Parameters**:
-- `start_date` (YYYY-MM-DD)
-- `end_date` (YYYY-MM-DD)
+- `report_name` (required) - Name of the table (e.g., CASH_FLOW, SALES, BOOKINGS)
+- `start_date` (optional) - Start date filter (YYYY-MM-DD)
+- `end_date` (optional) - End date filter (YYYY-MM-DD)
+- `limit` (optional) - Max records to return (default: 1000)
+- `order_by` (optional) - Column to sort by (e.g., "SALE_DATE DESC")
+- `filters` (optional) - Additional filters as key-value pairs
 
-**Example**: "Get yesterday's cash flow"
+**Examples**: 
+- "Get yesterday's cash flow"
+- "Show me top 10 clients by appointment count"
+- "Get all bookings for this week"
+- "Show sales from location 123"
 
 ## Available Tables
 

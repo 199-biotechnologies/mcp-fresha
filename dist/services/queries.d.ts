@@ -20,6 +20,15 @@ export interface CashFlowRow {
 export declare class QueryService {
     private snowflake;
     listTables(pattern?: string): Promise<TableInfo[]>;
+    getReportData(params: {
+        tableName: string;
+        startDate?: string;
+        endDate?: string;
+        dateColumn?: string;
+        limit?: number;
+        orderBy?: string;
+        filters?: Record<string, any>;
+    }): Promise<any[]>;
     getCashFlow(startDate: string, endDate: string): Promise<CashFlowRow[]>;
     getCashFlowSummary(startDate: string, endDate: string): Promise<{
         period: {

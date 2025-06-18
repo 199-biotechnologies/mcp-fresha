@@ -1,113 +1,96 @@
-# Fresha MCP Server
+# mcp-fresha
 
-MCP (Model Context Protocol) server for accessing Fresha Data Connector via Snowflake. This allows AI tools like Claude to query your Fresha business data directly.
+MCP (Model Context Protocol) server for accessing Fresha Data Connector via Snowflake. Query your Fresha business data directly through AI assistants like Claude.
 
-## Installation
+## Quick Start
 
 ```bash
-# Run directly with npx (recommended)
-npx mcp-fresha
+npm install -g mcp-fresha
 ```
 
 ## Configuration
 
-### Environment Variables
+### Claude Desktop
 
-Create a `.env` file with your Snowflake credentials (from Fresha Data Connector):
-
-```env
-SNOWFLAKE_ACCOUNT=your-account.snowflakecomputing.com
-SNOWFLAKE_USER=your-username
-SNOWFLAKE_PASSWORD=your-password
-SNOWFLAKE_DATABASE=FRESHA_DATA_CONNECTOR
-SNOWFLAKE_SCHEMA=FRESHA_DATA_113
-SNOWFLAKE_WAREHOUSE=FRESHA_DATA_113
-LOG_LEVEL=info
-```
-
-### Claude Desktop Configuration
-
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "fresha": {
-      "command": "npx",
-      "args": ["mcp-fresha"],
+      "command": "mcp-fresha",
       "env": {
         "SNOWFLAKE_ACCOUNT": "your-account.snowflakecomputing.com",
-        "SNOWFLAKE_USER": "your-username",
+        "SNOWFLAKE_USER": "FRESHA_DATA_XXX_XXX",
         "SNOWFLAKE_PASSWORD": "your-password",
         "SNOWFLAKE_DATABASE": "FRESHA_DATA_CONNECTOR",
-        "SNOWFLAKE_SCHEMA": "FRESHA_DATA_113",
-        "SNOWFLAKE_WAREHOUSE": "FRESHA_DATA_113"
+        "SNOWFLAKE_SCHEMA": "FRESHA_DATA_XXX",
+        "SNOWFLAKE_WAREHOUSE": "FRESHA_DATA_XXX"
       }
     }
   }
 }
 ```
 
+**Important**: If your password contains `#`, wrap it in quotes: `"password#123"`
+
+Get these credentials from your Fresha Data Connector settings.
+
 ## Available Tools
 
 ### `list_tables`
-List all tables and views available in your Fresha database.
+Lists all available tables and views in your Fresha database.
 
-Example queries:
-- "Show me all available tables"
-- "List tables matching 'CASH'"
+**Example**: "Show me all tables"
 
 ### `get_cash_flow_statement`
-Generate a cash flow statement for a specific date range.
+Generates detailed cash flow statements with transaction breakdowns.
 
-Parameters:
-- `start_date` (required): Start date in YYYY-MM-DD format
-- `end_date` (required): End date in YYYY-MM-DD format
+**Parameters**:
+- `start_date` (YYYY-MM-DD)
+- `end_date` (YYYY-MM-DD)
 
-Example queries:
-- "Show me yesterday's cash flow"
-- "Get cash flow statement for June 2025"
-- "What was my net cash flow last week?"
+**Example**: "Get yesterday's cash flow"
 
+## Available Tables
+
+Your Fresha database includes:
+- `CASH_FLOW` - Transaction-level cash flow data
+- `BOOKINGS` - Service bookings and appointments
+- `CLIENTS` - Client information and history
+- `PAYMENTS` - Payment transactions
+- `SALES` - Sales records
+- `LOCATIONS` - Business locations
+- `TEAM_MEMBERS` - Staff information
+- And more...
+
+## Troubleshooting
+
+### Authentication Failed
+- Ensure credentials match exactly from Fresha Data Connector
+- Check for special characters in password (especially `#`)
+- Remove `https://` from account URL if present
+
+### No Data Returned
+- Verify you have the correct database and schema names
+- Check Fresha Data Connector is active (8-hour daily limit)
 
 ## Development
 
 ```bash
-# Install dependencies
+# Clone and install
+git clone https://github.com/199-biotechnologies/mcp-fresha.git
+cd mcp-fresha/fresha-mcp-server
 npm install
 
-# Start in development mode
-npm run dev
+# Configure environment
+cp .env.example .env
+# Edit .env with your credentials
 
-# Build for production
+# Build and test
 npm run build
-
-# Run tests
 npm test
-
-# Format code
-npm run format
-
-# Lint code
-npm run lint
 ```
-
-## Security
-
-- Never commit your `.env` file
-- Use environment variables for all sensitive credentials
-- The server operates in read-only mode by default
-- Snowflake credentials are validated on startup
-
-## Troubleshooting
-
-### Connection Issues
-- Verify your Snowflake account URL format (remove https:// prefix)
-- Check that your credentials match those from Fresha Data Connector
-- Ensure your IP is whitelisted if using network policies
-
-### Rate Limits
-Fresha Data Connector has a fair use policy of 8 hours per day. The server doesn't currently track usage, so monitor your usage through Fresha's interface.
 
 ## License
 

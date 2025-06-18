@@ -1,9 +1,10 @@
 {
   "name": "fresha-mcp-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for Fresha Data Connector via Snowflake",
   "main": "dist/index.js",
   "bin": {
+    "fresha-mcp-server": "./dist/index.js",
     "fresha-mcp": "./dist/cli/index.js"
   },
   "type": "module",

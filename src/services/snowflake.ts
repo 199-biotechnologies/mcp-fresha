@@ -122,7 +122,24 @@ export class SnowflakeService {
           reject(err);
         } else {
           logger.info('Successfully connected to Snowflake');
-          resolve();
+
+          // -------------------------------------------------------------
+          // Ensure the session operates in the expected timezone so that
+          // date filters in reports match what the Fresha dashboard shows.
+          // -------------------------------------------------------------
+          const tz = process.env.FRESHA_TIMEZONE || 'Europe/London';
+          this.connection!.execute({
+            sqlText: `ALTER SESSION SET TIMEZONE = '${tz}'`,
+            complete: (tzErr) => {
+              if (tzErr) {
+                logger.warn({ tzErr, tz }, 'Failed to set Snowflake session timezone – continuing with default');
+              } else {
+                logger.info({ tz }, 'Snowflake session timezone set');
+              }
+              resolve();
+            },
+          });
+          // -------------------------------------------------------------
         }
       });
     });

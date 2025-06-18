@@ -5,8 +5,7 @@ MCP (Model Context Protocol) server for accessing Fresha Data Connector via Snow
 ## Installation
 
 ```bash
-npm install -g fresha-mcp-server
-# or run directly with npx
+# Run directly with npx (recommended)
 npx fresha-mcp-server
 ```
 
@@ -70,20 +69,6 @@ Example queries:
 - "Get cash flow statement for June 2025"
 - "What was my net cash flow last week?"
 
-## CLI Usage
-
-The package includes a CLI for direct database queries:
-
-```bash
-# List all tables
-fresha-mcp list-tables
-
-# Filter tables by pattern
-fresha-mcp list-tables --pattern CASH
-
-# Get cash flow statement
-fresha-mcp cash-flow --from 2025-06-01 --to 2025-06-17
-```
 
 ## Development
 

@@ -1,0 +1,1 @@
+{"version":3,"file":"tables.d.ts","sourceRoot":"","sources":["../../src/controllers/tables.ts"],"names":[],"mappings":"AAIA,qBAAa,gBAAgB;IAC3B,OAAO,CAAC,YAAY,CAAkC;;IAYhD,UAAU,CAAC,OAAO,CAAC,EAAE,MAAM,GAAG,OAAO,CAAC,MAAM,CAAC;IA0B7C,YAAY,CAAC,OAAO,CAAC,EAAE,MAAM,GAAG,OAAO,CAAC;QAAE,IAAI,EAAE,MAAM,CAAC;QAAC,IAAI,EAAE,MAAM,CAAA;KAAE,EAAE,CAAC;CAQhF"}

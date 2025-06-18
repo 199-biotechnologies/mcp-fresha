@@ -11,6 +11,9 @@ export const FRESHA_TABLES = {
     SALES: {
         name: 'SALES',
         description: 'Comprehensive sales transactions',
+        detailedDescription: 'Comprehensive listing of all sales transactions. Analyze discounts, taxes, service charges, and tips.',
+        keyColumns: ['SALE_ID', 'LOCATION_ID', 'TEAM_MEMBER_ID', 'CLIENT_ID', 'SALE_DATE'],
+        keyMetrics: ['Discounted value', 'Tax calculations', 'Service charges', 'Tips tracking', 'Revenue by location/staff'],
         dateColumn: 'SALE_DATE',
         defaultOrderBy: 'SALE_DATE DESC',
         commonFilters: ['LOCATION_ID', 'TEAM_MEMBER_ID', 'CLIENT_ID', 'PAYMENT_STATUS'],
@@ -19,6 +22,9 @@ export const FRESHA_TABLES = {
     SALE_ITEMS: {
         name: 'SALE_ITEMS',
         description: 'Individual items within sales',
+        detailedDescription: 'Detailed records of individual items within sales. Track average net sales per item, profit margins, and popular sale times.',
+        keyColumns: ['SALE_ITEM_ID', 'SALE_ID', 'BOOKING_ID', 'CLIENT_ID', 'ITEM_TYPE'],
+        keyMetrics: ['Average net sales per item', 'Profit margins', 'Popular sale times', 'Item performance'],
         dateColumn: 'SALE_DATE',
         defaultOrderBy: 'SALE_DATE DESC',
         commonFilters: ['SALE_ID', 'ITEM_CATEGORY', 'SUPPLIER', 'BRAND'],
@@ -26,6 +32,9 @@ export const FRESHA_TABLES = {
     PAYMENTS: {
         name: 'PAYMENTS',
         description: 'All payment records',
+        detailedDescription: 'Detailed records of all payment transactions. Track gift card sales/redemption, deposit redemption, and refunds.',
+        keyColumns: ['SALE_NUMBER', 'SALE_ID', 'APPOINTMENT_ID', 'CLIENT_ID', 'PAYMENT_METHOD'],
+        keyMetrics: ['Gift card sales and redemption', 'Deposit redemption', 'Refund tracking', 'Payment method analysis'],
         dateColumn: 'PAYMENT_DATE',
         defaultOrderBy: 'PAYMENT_DATE DESC',
         commonFilters: ['SALE_ID', 'APPOINTMENT_ID', 'CLIENT_ID', 'LOCATION_ID'],
@@ -82,6 +91,9 @@ export const FRESHA_TABLES = {
     BOOKINGS: {
         name: 'BOOKINGS',
         description: 'Service bookings for appointments',
+        detailedDescription: 'Contains booked services for each appointment. Essential for analyzing appointment sources, cancellation rates, client retention, and popular booking times.',
+        keyColumns: ['BOOKING_ID', 'APPOINTMENT_ID', 'CLIENT_ID', 'SERVICE_ID', 'TEAM_MEMBER_ID'],
+        keyMetrics: ['Appointment sources', 'Cancellation and no-show rates', 'Client retention', 'Popular booking times'],
         dateColumn: 'BOOKING_DATE',
         defaultOrderBy: 'BOOKING_DATE DESC',
         commonFilters: ['APPOINTMENT_ID', 'SERVICE_ID', 'CLIENT_ID', 'TEAM_MEMBER_ID', 'STATUS'],
@@ -97,6 +109,9 @@ export const FRESHA_TABLES = {
     CLIENTS: {
         name: 'CLIENTS',
         description: 'Client information and history',
+        detailedDescription: 'Contains client information and appointment history. Track new vs. returning clients, days since last appointment, and client reviews.',
+        keyColumns: ['CLIENT_ID', 'SIGN_UP_DATE', 'FIRST_APPOINTMENT_DATE', 'LAST_APPOINTMENT_DATE'],
+        keyMetrics: ['New vs. returning clients', 'Days since last appointment', 'Client reviews', 'Client lifetime value'],
         defaultOrderBy: 'CLIENT_NAME',
         commonFilters: ['CLIENT_ID', 'LOCATION_ID', 'IS_DELETED'],
     },

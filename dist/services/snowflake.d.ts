@@ -25,8 +25,12 @@ export type SnowflakeConfig = z.infer<typeof SnowflakeConfigSchema>;
 export declare class SnowflakeService {
     private connection;
     private config;
+    private connectionAttempts;
+    private readonly MAX_RETRY_ATTEMPTS;
     constructor();
     connect(): Promise<void>;
+    private shouldRetryConnection;
+    private getDetailedErrorMessage;
     execute<T = any>(query: string, binds?: any[]): Promise<T[]>;
     disconnect(): Promise<void>;
 }

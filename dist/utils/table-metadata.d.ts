@@ -1,6 +1,9 @@
 export interface TableMetadata {
     name: string;
     description: string;
+    detailedDescription?: string;
+    keyColumns?: string[];
+    keyMetrics?: string[];
     dateColumn?: string;
     defaultOrderBy?: string;
     commonFilters?: string[];

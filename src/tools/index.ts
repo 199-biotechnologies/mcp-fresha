@@ -52,13 +52,13 @@ export const tools: Tool[] = [
   },
   {
     name: 'get_fresha_report',
-    description: 'Get data from any Fresha report/table with flexible filtering options',
+    description: 'Get data from any Fresha report/table with flexible filtering options. Available reports: BOOKINGS, CASH_FLOW, CLIENT_NOTES, CLIENTS, COMMISSIONS, DEPOSITS, GIFT_CARDS, LOCATIONS, MEMBERSHIPS, OCCUPANCY, PAYMENTS, PRODUCTS, SALE_ITEMS, SALES, SERVICE_CHARGES, SERVICES, STOCK_MOVEMENTS, STOCK_ORDERS, TAXES, TEAM_MEMBERS, TIME_OFF, TIMESHEETS, TIPS, WAGES, WAITLIST',
     inputSchema: {
       type: 'object',
       properties: {
         report_name: {
           type: 'string',
-          description: 'Name of the Fresha report/table (e.g., CASH_FLOW, SALES, BOOKINGS)',
+          description: 'Name of the Fresha report/table. Available: BOOKINGS, CASH_FLOW, CLIENT_NOTES, CLIENTS, COMMISSIONS, DEPOSITS, GIFT_CARDS, LOCATIONS, MEMBERSHIPS, OCCUPANCY, PAYMENTS, PRODUCTS, SALE_ITEMS, SALES, SERVICE_CHARGES, SERVICES, STOCK_MOVEMENTS, STOCK_ORDERS, TAXES, TEAM_MEMBERS, TIME_OFF, TIMESHEETS, TIPS, WAGES, WAITLIST',
         },
         start_date: {
           type: 'string',

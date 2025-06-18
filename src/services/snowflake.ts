@@ -22,11 +22,16 @@ const SnowflakeConfigSchema = z.object({
 
 export type SnowflakeConfig = z.infer<typeof SnowflakeConfigSchema>;
 
+// Configure Snowflake SDK globally to respect proxy environment variables
+snowflake.configure({ useEnvProxy: true });
+
 export class SnowflakeService {
   private connection: snowflake.Connection | null = null;
+  private connectionPromise: Promise<void> | null = null;
   private config: SnowflakeConfig;
   private connectionAttempts = 0;
   private readonly MAX_RETRY_ATTEMPTS = 3;
+  private readonly BASE_RETRY_DELAY = 1000;
 
   constructor() {
     // Validate environment variables
@@ -40,10 +45,27 @@ export class SnowflakeService {
   }
 
   async connect(): Promise<void> {
+    // Return existing connection
     if (this.connection) {
       return;
     }
 
+    // Return in-progress connection to prevent race conditions
+    if (this.connectionPromise) {
+      return this.connectionPromise;
+    }
+
+    // Create new connection promise
+    this.connectionPromise = this.connectWithRetry();
+    
+    try {
+      await this.connectionPromise;
+    } finally {
+      this.connectionPromise = null;
+    }
+  }
+
+  private async connectWithRetry(): Promise<void> {
     const connectionOptions = {
       account: this.config.SNOWFLAKE_ACCOUNT.replace('https://', '').replace('.snowflakecomputing.com', ''),
       username: this.config.SNOWFLAKE_USER,
@@ -52,36 +74,54 @@ export class SnowflakeService {
       schema: this.config.SNOWFLAKE_SCHEMA,
       warehouse: this.config.SNOWFLAKE_WAREHOUSE,
       clientSessionKeepAlive: true,
-      clientSessionKeepAliveHeartbeatFrequency: 3600,
-      // Support proxy from environment variables
-      useEnvProxy: true,
+      clientSessionKeepAliveHeartbeatFrequency: 900, // Snowflake recommended: 15 minutes
+      // Proxy settings from environment variables are handled by global config
     };
 
+    let lastError: Error | null = null;
+    this.connectionAttempts = 0;
+
+    while (this.connectionAttempts <= this.MAX_RETRY_ATTEMPTS) {
+      try {
+        await this.attemptConnection(connectionOptions);
+        this.connectionAttempts = 0;
+        return;
+      } catch (err: any) {
+        lastError = err;
+        
+        if (!this.shouldRetryConnection(err) || this.connectionAttempts >= this.MAX_RETRY_ATTEMPTS) {
+          throw new Error(this.getDetailedErrorMessage(err));
+        }
+
+        const delay = Math.pow(2, this.connectionAttempts) * this.BASE_RETRY_DELAY;
+        logger.info(`Retrying connection in ${delay}ms (attempt ${this.connectionAttempts + 1}/${this.MAX_RETRY_ATTEMPTS})...`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+        this.connectionAttempts++;
+      }
+    }
+
+    throw lastError || new Error('Failed to connect after maximum retries');
+  }
+
+  private attemptConnection(options: any): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.connection = snowflake.createConnection(connectionOptions);
+      this.connection = snowflake.createConnection(options);
 
       this.connection.connect((err, conn) => {
         if (err) {
-          logger.error({ error: err, attempt: this.connectionAttempts + 1 }, 'Failed to connect to Snowflake');
+          logger.error({ 
+            error: { 
+              code: err.code,
+              message: err.message,
+              // Don't log full error to avoid leaking credentials
+            }, 
+            attempt: this.connectionAttempts + 1 
+          }, 'Failed to connect to Snowflake');
           this.connection = null;
-          
-          // Handle specific error cases
-          const errorMessage = this.getDetailedErrorMessage(err);
-          
-          // Retry logic for transient errors
-          if (this.shouldRetryConnection(err) && this.connectionAttempts < this.MAX_RETRY_ATTEMPTS) {
-            this.connectionAttempts++;
-            logger.info(`Retrying connection (attempt ${this.connectionAttempts}/${this.MAX_RETRY_ATTEMPTS})...`);
-            setTimeout(() => {
-              this.connect().then(resolve).catch(reject);
-            }, 1000 * this.connectionAttempts); // Exponential backoff
-          } else {
-            this.connectionAttempts = 0;
-            reject(new Error(errorMessage));
-          }
+          reject(err);
         } else {
           logger.info('Successfully connected to Snowflake');
-          this.connectionAttempts = 0;
           resolve();
         }
       });
@@ -102,10 +142,12 @@ export class SnowflakeService {
   }
 
   private getDetailedErrorMessage(err: any): string {
+    const errorCode = err.code || (err as any).number;
+    
     if (err.code === 'ENOTFOUND' || err.message?.includes('ENOTFOUND')) {
       return `Cannot reach Snowflake account. Please check SNOWFLAKE_ACCOUNT is correct (current: ${this.config.SNOWFLAKE_ACCOUNT})`;
     }
-    if (err.code === '390100' || err.message?.includes('Incorrect username or password')) {
+    if (errorCode === '390100' || errorCode === 390100 || err.message?.includes('Incorrect username or password')) {
       return 'Authentication failed. Please verify SNOWFLAKE_USER and SNOWFLAKE_PASSWORD are correct.';
     }
     if (err.message?.includes('does not exist')) {
@@ -129,24 +171,32 @@ export class SnowflakeService {
         binds,
         complete: (err, stmt, rows) => {
           if (err) {
+            // Sanitize error for logging - don't include full SQL or error object
             logger.error({ 
-              error: err, 
-              query: query.substring(0, 500), // Truncate long queries in logs
+              error: {
+                code: err.code,
+                number: (err as any).number,
+                message: err.message?.substring(0, 200), // Truncate to avoid leaking SQL
+                state: (err as any).state,
+              },
+              queryLength: query.length,
               binds: binds.length > 0 ? `${binds.length} parameters` : 'none'
             }, 'Query execution failed');
             
             // Provide more specific error messages
             let errorMessage = 'Query execution failed: ';
+            const errorCode = err.code || (err as any).number;
             
-            if (err.code?.toString() === '002003' || err.message?.includes('does not exist')) {
+            if (errorCode?.toString() === '002003' || err.message?.includes('does not exist')) {
               errorMessage += 'Table or column not found. ';
-            } else if (err.code?.toString() === '090106' || err.message?.includes('Warehouse')) {
+            } else if (errorCode?.toString() === '090106' || err.message?.includes('Warehouse')) {
               errorMessage += 'Warehouse is suspended or does not exist. ';
             } else if (err.message?.includes('syntax error')) {
               errorMessage += 'SQL syntax error. ';
             }
             
-            errorMessage += err.message || err;
+            // Don't include full error message which might contain SQL
+            errorMessage += `Error code: ${errorCode}`;
             reject(new Error(errorMessage));
           } else {
             resolve(rows as T[]);

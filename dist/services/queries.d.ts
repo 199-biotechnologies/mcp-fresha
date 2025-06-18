@@ -19,6 +19,9 @@ export interface CashFlowRow {
 }
 export declare class QueryService {
     private snowflake;
+    private quoteIdentifier;
+    private validateTableName;
+    private validateColumnName;
     listTables(pattern?: string): Promise<TableInfo[]>;
     getReportData(params: {
         tableName: string;

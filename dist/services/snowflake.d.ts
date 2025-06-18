@@ -24,11 +24,15 @@ declare const SnowflakeConfigSchema: z.ZodObject<{
 export type SnowflakeConfig = z.infer<typeof SnowflakeConfigSchema>;
 export declare class SnowflakeService {
     private connection;
+    private connectionPromise;
     private config;
     private connectionAttempts;
     private readonly MAX_RETRY_ATTEMPTS;
+    private readonly BASE_RETRY_DELAY;
     constructor();
     connect(): Promise<void>;
+    private connectWithRetry;
+    private attemptConnection;
     private shouldRetryConnection;
     private getDetailedErrorMessage;
     execute<T = any>(query: string, binds?: any[]): Promise<T[]>;
